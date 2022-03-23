@@ -23,7 +23,7 @@ func main(){
 	raw_text = strings.ReplaceAll(raw_text, "\n", "")
  	text := strings.Split(raw_text,".")
 
-	fmt.Println(raw_text,text)
+	fmt.Println(len(raw_text),len(text))
 	fmt.Println("Data Fetched \nBuilding Index...")
 	var index [] int
 

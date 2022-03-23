@@ -5,32 +5,15 @@ import (
 )
 
 type node struct {
-	/*
-	 * The payload array used to store the data (indexes) associated with this node.
-	 * In this case, it is used to store all property indexes.
-	 */
+
 	data []int
-	/**
-	 * The set of edges starting from this node
-	 */
+
 	edges []*edge
-	/**
-	 * The suffix link as described in Ukkonen's paper.
-	 * if str is the string denoted by the path from the root to this, this.suffix
-	 * is the node denoted by the path that corresponds to str without the first rune.
-	 */
+
 	suffix *node
 }
 
-/*
- * getData returns the first numElements elements from the ones associated to this node.
- *
- * Gets data from the payload of both this node and its children, the string representation
- * of the path to this node is a substring of the one of the children nodes.
- *
- * @param numElements the number of results to return. Use <=0 to get all
- * @return the first numElements associated to this node and children
- */
+
 func (n *node) getData(numElements int) (ret []int) {
 
 	if numElements > 0 {
@@ -45,7 +28,6 @@ func (n *node) getData(numElements int) (ret []int) {
 		ret = n.data
 	}
 
-	// need to get more matches from child nodes. This is what may waste time
 	for _, edge := range n.edges {
 		data := edge.node.getData(numElements)
 	NEXTIDX:
@@ -70,13 +52,11 @@ func (n *node) getData(numElements int) (ret []int) {
 	return
 }
 
-// addRef adds the given index to the set of indexes associated with this
 func (n *node) addRef(index int) {
 	if n.contains(index) {
 		return
 	}
 	n.addIndex(index)
-	// add this reference to all the suffixes as well
 	iter := n.suffix
 	for iter != nil {
 		if iter.contains(index) {
