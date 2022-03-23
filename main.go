@@ -102,17 +102,17 @@ func main(){
 	defer db.Close()
 
 	// ##############  inserting webpage Key #################
-	// err = db.Update(func(txn *badger.Txn) error {
-	// 	err := txn.Set([]byte(url), Webpage{
-	// 		Text:text,
-	// 		Index:index,
-	// 	}.encodeWebpage())
-	// 	return err
-	//   })
+	err = db.Update(func(txn *badger.Txn) error {
+		err := txn.Set([]byte(url), Webpage{
+			Text:text,
+			Index:index,
+		}.encodeWebpage())
+		return err
+	  })
 
-	// if err != nil{
-	// 	panic(err)
-	// }
+	if err != nil{
+		panic(err)
+	}
 	
 	// ##############  Iterating over all Keys #################
 	err = db.View(func(txn *badger.Txn) error {
