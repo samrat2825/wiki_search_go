@@ -10,4 +10,5 @@ To Run:
 
 1. Install golang
 2. git clone https://github.com/samrat2825/wiki_search_go.git
-3. Run main.go
+3. go mod tidy
+4. Run main.go: go run .

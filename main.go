@@ -6,7 +6,29 @@ import (
 	"wiki_search_go/modules/suffix_tree"
 	"sort"
 	"strings"
+	"log"
+	"encoding/json"
+	badger "github.com/dgraph-io/badger/v3"
 )
+
+type Webpage struct{
+	Text [] string
+	Index []int
+}
+
+func (w Webpage) encodeWebpage() []byte {
+	data, err := json.Marshal(w)
+	if err != nil{
+		panic(err)
+	}
+	return data
+}
+
+func deccodeWebpage(data []byte) (Webpage, error) {
+	var w Webpage
+	err := json.Unmarshal(data, &w)
+	return w,err
+}
 
 func main(){
 	fmt.Println("\nEnter Wikipedia URL to index")
@@ -64,7 +86,58 @@ func main(){
 				}
 		}
 
-	fmt.Println(len(output))
 	fmt.Println(output)
 
+	// ################################################
+	// ########  Storing Data in BadgerDB  ############
+	// ################################################
+
+	// url : {text []string, index []int}
+
+	db, err := badger.Open(badger.DefaultOptions("/data/badger"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer db.Close()
+
+	// ##############  inserting webpage Key #################
+	// err = db.Update(func(txn *badger.Txn) error {
+	// 	err := txn.Set([]byte(url), Webpage{
+	// 		Text:text,
+	// 		Index:index,
+	// 	}.encodeWebpage())
+	// 	return err
+	//   })
+
+	// if err != nil{
+	// 	panic(err)
+	// }
+	
+	// ##############  Iterating over all Keys #################
+	err = db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchSize = 10
+		it := txn.NewIterator(opts)
+		defer it.Close()
+		for it.Rewind(); it.Valid(); it.Next() {
+		  item := it.Item()
+		  k := item.Key()
+		  err := item.Value(func(v []byte) error {
+			webpage , _ := deccodeWebpage(v)
+			fmt.Printf("key=%s, value=%+v\n", k,webpage)
+			
+			return nil
+		  })
+		  if err != nil {
+			return err
+		  }
+		}
+		return nil
+	  })
+
+	if err != nil{
+		panic(err)
+	}
+	  
 }
